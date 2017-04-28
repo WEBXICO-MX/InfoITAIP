@@ -13,11 +13,11 @@ $trimestre = isset($_SESSION['trimestre']) ? (int) $_SESSION['trimestre'] : 0;
 
 $anios = [2015, 2016, 2017];
 $trimestres = ["1er trimestre (enero-marzo)", "2do trimestre (abril-junio)", "3er trimestre (julio-septimebre)", "4to trimestre (octubre-diciembre)"];
-ChromePhp::log("Prueba de consola");
+//ChromePhp::log("Prueba de consola");
 if (isset($_POST["xAccion"])) {
    
     if ($_POST["xAccion"] === "cambiar") {
-        ChromePhp::log('Entre a cambiar');
+        //ChromePhp::log('Entre a cambiar');
         $_SESSION['anio'] = (int) $_POST['cmbAnio'];
         $_SESSION['trimestre'] = (int) $_POST['cmbTrimestre'];
         header('Location: anexos.php');
