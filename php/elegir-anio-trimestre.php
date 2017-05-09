@@ -1,6 +1,6 @@
 <?php
 session_start();
-include '../class/ChromePhp.php';
+require_once '../class/Area.php';
 
 if (!isset($_SESSION['usr'])) {
     header('Location: ../index.php');
@@ -13,7 +13,7 @@ $trimestre = isset($_SESSION['trimestre']) ? (int) $_SESSION['trimestre'] : 0;
 
 $anios = [2015, 2016, 2017];
 $trimestres = ["1er trimestre (enero-marzo)", "2do trimestre (abril-junio)", "3er trimestre (julio-septimebre)", "4to trimestre (octubre-diciembre)"];
-//ChromePhp::log("Prueba de consola");
+
 if (isset($_POST["xAccion"])) {
    
     if ($_POST["xAccion"] === "cambiar") {

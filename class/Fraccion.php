@@ -6,6 +6,7 @@
  * @see {@link http://webxico.blogspot.mx/}
  */
 require_once('UtilDB.php');
+require_once('ChromePhp.php');
 
 class Fraccion {
 
@@ -35,7 +36,7 @@ class Fraccion {
     function __construct1(Articulo $xCveArticulo, $xCveFraccion) {
         $this->limpiar();
         $this->cveArticulo = $xCveArticulo;
-        $this->cvefraccion = $xCveFraccion;
+        $this->cveFraccion = $xCveFraccion;
         $this->cargar();
     }
 

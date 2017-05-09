@@ -1,21 +1,15 @@
-<%-- 
-    Document   : incisos
-    Created on : 23/03/2017, 03:36:34 PM
-    Author     : Viruliento
---%>
+<?php session_start();
 
-<%@page import="mx.edu.uttab.transparencia.comun.*"%>
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
-<%  HttpSession httpSession = request.getSession(false);
+    $area = isset($_SESSION['area']) ? (int) $_SESSION['area'] : 0;
+    $origen = "inciso";
 
-    int area = httpSession.getAttribute(Sesiones.AREA) != null ? Integer.parseInt(httpSession.getAttribute(Sesiones.AREA).toString()) : 0;
-
-    if (httpSession.getAttribute(Sesiones.USUARIO) == null || area != 1) {
-        response.sendRedirect("../index.jsp");
+    if (!isset($_SESSION['usr']) or $area != 1) {
+        header("Location: ../index.php");
+        die();
         return;
     }
 
-%>
+?>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -23,11 +17,11 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>UTTAB | Universidad Tecnológica de Tabasco</title>
-        <link href="${pageContext.request.contextPath}/img/favicon.ico" rel="icon" >
-        <link href="${pageContext.request.contextPath}/css/bootstrap.min.css" rel="stylesheet">
-        <link href="${pageContext.request.contextPath}/css/bootstrap-datepicker.min.css" rel="stylesheet"> 
-        <link href="${pageContext.request.contextPath}/css/dataTables.bootstrap.min.css" rel="stylesheet"/>
-        <link href="${pageContext.request.contextPath}/css/infoITAIP.css" rel="stylesheet"/>
+        <link href="../img/favicon.ico" rel="icon" >
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/bootstrap-datepicker.min.css" rel="stylesheet"> 
+        <link href="../css/dataTables.bootstrap.min.css" rel="stylesheet"/>
+        <link href="../css/infoITAIP.css" rel="stylesheet"/>
         <style>
             textarea {
                 resize: none;
@@ -41,10 +35,7 @@
         <![endif]-->
     <body>
         <div class="container-fluid">
-
-            <jsp:include page="include-header.jsp">
-                <jsp:param name="o" value="inciso" />
-            </jsp:include>
+            <?php include '../php/include-header.php';?>
 
             <div class="row">
                 <div class="col-md-12">&nbsp;</div>
@@ -64,27 +55,22 @@
                                         <label for="cmbArticulo">Artículo:</label>
                                         <select id="xCveArticulo" name="xCveArticulo" class="form-control">
                                             <option value="0">---------- SELECCIONE UNA OPCIÓN -----------</option>
-                                            <%                                                Resultados rs = new Resultados();
-                                                StringBuilder sql = new StringBuilder();
-                                                sql = new StringBuilder();
-
-                                                sql.append("SELECT CVE_ARTICULO IDART,NOMBRE,DESCRIPCION,ACTIVO FROM ARTICULOS WHERE ACTIVO = 1 ORDER BY DESCRIPCION");
-                                                rs = UtilDB.ejecutaConsulta(sql.toString());
-                                                if (rs.recordCount() != 0) {
-                                                    while (rs.next()) {
-                                            %>
-                                            <option value="<%=(rs.getInt("IDART"))%>"><%=(rs.getString("NOMBRE"))%></option>                           
-                                            <%
+                                            <?php  
+                                                $sql = "SELECT CVE_ARTICULO IDART,NOMBRE,DESCRIPCION,ACTIVO FROM ARTICULOS WHERE ACTIVO = 1 ORDER BY DESCRIPCION";
+                                                $rst = UtilDB::ejecutaConsulta($sql);
+                                                if ($rst->rowCount() != 0) {
+                                                    foreach($rst as $row) {
+                                            ?>
+                                            <option value="<?php echo($row["IDART"]);?>"><?php echo($row["NOMBRE"]);?></option>                           
+                                            <?php
                                                 }
                                             } else {
-                                            %>
+                                            ?>
                                             <option value="0" selected>No existen artículos.</option>
-                                            <%
+                                            <?php
                                                 }
-                                                rs.close();
-                                                rs = null;
-                                                sql = new StringBuilder();
-                                            %>                                        
+                                                $rst->closeCursor();
+                                            ?>                                        
                                         </select>
                                         <input type="hidden" name="xCveArticuloV" id="xCveArticuloV" value="0" style="width:5%" readonly="">
                                     </div>
@@ -132,14 +118,14 @@
 
         </div>
 
-        <jsp:include page="include-footer.jsp" />
-        <script src="${pageContext.request.contextPath}/js/jquery-3.2.1.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>        
-        <script src="${pageContext.request.contextPath}/js/bootstrap-datepicker.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/bootstrap-datepicker.es.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/jquery.dataTables.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/dataTables.bootstrap.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/infoITAIP.min.js"></script>
+        <?php include '../php/include-footer.php';?>
+        <script src="../js/jquery-3.2.1.min.js"></script>
+        <script src="../js/bootstrap.min.js"></script>        
+        <script src="../js/bootstrap-datepicker.min.js"></script>
+        <script src="../js/bootstrap-datepicker.es.min.js"></script>
+        <script src="../js/jquery.dataTables.min.js"></script>
+        <script src="../js/dataTables.bootstrap.min.js"></script>
+        <script src="../js/infoITAIP.min.js"></script>
         <script>
 
                                             $(document).ready(function () {
@@ -171,11 +157,11 @@
                                                                         $("#xCveArticuloV").val(elegido);
                                                                         $.post("acciones.jsp", {cveArt: elegido, xAccion: "cargaComboFracciones"}, function (data) {
                                                                             $("#xCveFraccion").html(data);
-                                                                            $("#xCveFraccion").attr("disabled", false)
+                                                                            $("#xCveFraccion").attr("disabled", false);
                                                                         });
                                                                     }
                                                             );
-                                                        })
+                                                        });
 
                                                 $("#xCveFraccion").change(
                                                         function ()
@@ -187,7 +173,7 @@
                                                                         $("#xCveFraccionV").val(elegido);
                                                                     }
                                                             );
-                                                        })
+                                                        });
 
                                             });
 
@@ -211,7 +197,7 @@
 
                                             function Activo(v)
                                             {
-                                                if (v == true) {
+                                                if (v === true) {
                                                     $('#xActivoVal').val(1);
                                                 } else {
                                                     $('#xActivoVal').val(0);
@@ -221,26 +207,27 @@
                                             function grabar()
                                             {
 
-                                                if ($("#xCveArticuloV").val() == "0") {
+                                                if ($("#xCveArticuloV").val() === "0") {
                                                     $("#alertaIncisos").html("<span class='custom critical'>Debe seleccionar un artículo.</span>");
                                                     $("#xCveArticulo").focus();
-                                                    return
+                                                    return;
                                                 }
-                                                if ($("#xCveFraccionV").val() == "0") {
+                                                if ($("#xCveFraccionV").val() === "0") {
                                                     $("#alertaIncisos").html("<span class='custom critical'>Debe seleccionar una fracción.</span>");
                                                     $("#xCveFraccion").focus();
-                                                    return
+                                                    return;
                                                 }
-                                                if ($("#xDescripcion").val() == "") {
+                                                if ($("#xDescripcion").val() === "") {
                                                     $("#alertaIncisos").html("<span class='custom critical'>Debe capturar algo en el campo descripción.</span>");
                                                     $("#xDescripcion").focus();
-                                                    return
+                                                    return;
                                                 }
 
                                                 var datos = $("#formIncisos").serialize();
+                                                datos += "&xAccion=grabaIncisos";
                                                 $.ajax(
                                                         {
-                                                            url: "acciones.jsp?xAccion=grabaIncisos", type: "POST", data: datos, success: function (result)
+                                                            url: "acciones.jsp", type: "POST", data: datos, success: function (result)
                                                             {
                                                                 var n = result.trim();
                                                                 var no = n.split('|');
@@ -281,7 +268,7 @@
                                                     $("#xDescripcion").val(data.xDescripcion);
                                                     $("#xDescripcion").select();
 
-                                                    if (data.xActivo == true) {
+                                                    if (data.xActivo === true) {
                                                         $("#xActivo").prop("checked", "checked");
                                                         $('#xActivoVal').val(1);
                                                     } else {

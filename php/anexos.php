@@ -1,32 +1,31 @@
-<%-- 
-    Document   : anexos
-    Created on : 23-mar-2017, 10:23:45
-    Author     : Roberto Eder Weiss Juárez
---%>
+<?php
+session_start();
+require_once '../class/Area.php';
+require_once '../class/ChromePhp.php';
+//ChromePhp::log("sesion usr: " . $_SESSION['usr']);
+//ChromePhp::log("sesion area: " . $_SESSION['area']);
+if (!isset($_SESSION['usr']) or $_SESSION['area'] != 1) {
+    header('Location: ../index.php');
+    die();
+    return;
+}
 
-<%@page import="java.util.Calendar"%>
-<%@page import="mx.edu.uttab.transparencia.comun.*"%>
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
-<%  HttpSession httpSession = request.getSession(false);
+$origen = "anexos";
+$usuario = isset($_SESSION['usr']) ? (int) $_SESSION['usr'] : 0;
+$anio = isset($_SESSION['anio']) ? (int) $_SESSION['anio'] : 0;
+$trimestre = isset($_SESSION['trimestre']) ? (int) $_SESSION['trimestre'] : 0;
+$area_sesion = isset($_SESSION['area']) ? (int) $_SESSION['area'] : 0;
+//ChromePhp::log("anio: $anio");
+//ChromePhp::log("trimestre: $trimestre");
 
-    if (httpSession.getAttribute(Sesiones.USUARIO) == null) {
-        response.sendRedirect("../index.jsp");
-        return;
-    }
+if ($anio == 0 || $trimestre == 0) {
+    header('Location: elegir-anio-trimestre.php');
+    die();
+    return;
+}
 
-    int usuario = httpSession.getAttribute(Sesiones.USUARIO) != null ? Integer.parseInt(httpSession.getAttribute(Sesiones.USUARIO).toString()) : 0;
-    int anio = httpSession.getAttribute(Sesiones.ANIO) != null ? Integer.parseInt(httpSession.getAttribute(Sesiones.ANIO).toString()) : 0;
-    int trimestre = httpSession.getAttribute(Sesiones.TRIMESTRE) != null ? Integer.parseInt(httpSession.getAttribute(Sesiones.TRIMESTRE).toString()) : 0;
-    int area = httpSession.getAttribute(Sesiones.AREA) != null ? Integer.parseInt(httpSession.getAttribute(Sesiones.AREA).toString()) : 0;
-
-    if (anio == 0 || trimestre == 0) {
-        response.sendRedirect("elegir-anio-trimestre.jsp");
-        return;
-    }
-    
-   String[] trimestres = {"1er trimestre (enero-marzo)", "2do trimestre (abril-junio)", "3er trimestre (julio-septimebre)", "4to trimestre (octubre-diciembre)"};
-
-%>
+$trimestres = ["1er trimestre (enero-marzo)", "2do trimestre (abril-junio)", "3er trimestre (julio-septimebre)", "4to trimestre (octubre-diciembre)"];
+?>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -34,11 +33,11 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>UTTAB | Universidad Tecnológica de Tabasco</title>
-        <link href="${pageContext.request.contextPath}/img/favicon.ico" rel="icon" >
-        <link href="${pageContext.request.contextPath}/css/bootstrap.min.css" rel="stylesheet">
-        <link href="${pageContext.request.contextPath}/css/bootstrap-datepicker.min.css" rel="stylesheet"> 
-        <link href="${pageContext.request.contextPath}/css/dataTables.bootstrap.min.css" rel="stylesheet"/>
-        <link href="${pageContext.request.contextPath}/css/infoITAIP.css" rel="stylesheet"/>
+        <link href="../img/favicon.ico" rel="icon" >
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/bootstrap-datepicker.min.css" rel="stylesheet"> 
+        <link href="../css/dataTables.bootstrap.min.css" rel="stylesheet"/>
+        <link href="../css/infoITAIP.css" rel="stylesheet"/>
         <style>
             textarea {
                 resize: none;
@@ -53,16 +52,14 @@
     <body>
         <div class="container-fluid">
 
-            <jsp:include page="include-header.jsp">
-                <jsp:param name="o" value="anexos" />
-            </jsp:include>
+            <?php require_once 'include-header.php'; ?>
 
             <div class="row">
                 <div class="col-md-12">&nbsp;</div>
             </div>
             <div class="row">
                 <div class="col-md-12">
-                     <h2 class="text-center"><%= trimestres[trimestre - 1]%> <%= anio%></h2>
+                    <h2 class="text-center"><?php echo($trimestres[$trimestre - 1]); ?> <?php echo($anio); ?></h2>
                 </div>
             </div>
 
@@ -75,41 +72,39 @@
                         <div class="panel-body">
                             <div class="form-group">
                                 <form action="" name="formDocumento" id="formDocumento" method="post">
-                                    <input name="xCveUsuario" id="xCveUsuario" type="hidden" value="<%=usuario%>" readonly="">
+                                    <input name="xCveUsuario" id="xCveUsuario" type="hidden" value="<?php echo($usuario); ?>" readonly="">
                                     <br>
-                                    <input name="xCveAnio" id="xCveAnio" type="hidden" value="<%=anio%>" readonly="">
-                                    <input name="xCveTrimestre" id="xCveTrimestre" type="hidden" value="<%=trimestre%>" readonly="">
+                                    <input name="xCveAnio" id="xCveAnio" type="hidden" value="<?php echo($anio); ?>" readonly="">
+                                    <input name="xCveTrimestre" id="xCveTrimestre" type="hidden" value="<?php echo($trimestre); ?>" readonly="">
                                     <input name="xCveDocumento" id="xCveDocumento" type="hidden" value="0" readonly="">
 
-                                    <input name="xCveUsuario2" id="xCveUsuario2" type="hidden" value="<%=usuario%>" readonly="">
+                                    <input name="xCveUsuario2" id="xCveUsuario2" type="hidden" value="<?php echo($usuario); ?>" readonly="">
                                     <input name="xFechaActualizacionR" id="xFechaActualizacionR" type="hidden" value="" readonly="">
 
                                     <div class="form-group">
                                         <label for="cmbArticulo">Artículo:</label>
                                         <select id="xCveArticulo" name="xCveArticulo" class="form-control">
                                             <option value="0">---------- SELECCIONE UNA OPCIÓN -----------</option>
-                                            <%                                                Resultados rs = new Resultados();
-                                                StringBuilder sql = new StringBuilder("SELECT CVE_ARTICULO IDART,DESCRIPCION,NOMBRE,ACTIVO FROM ARTICULOS WHERE ACTIVO = 1  ");
-                                                if (area != 1) {
-                                                    sql.append("AND CVE_ARTICULO IN (SELECT cve_articulo FROM permisos WHERE activo = 1 AND cve_area = ").append(area).append(" GROUP BY cve_articulo) ");
-                                                }
-                                                sql.append("ORDER BY cve_articulo");
-                                                rs = UtilDB.ejecutaConsulta(sql.toString());
-                                                if (rs.recordCount() != 0) {
-                                                    while (rs.next()) {
-                                            %>
-                                            <option value="<%=(rs.getInt("IDART"))%>"><%=(rs.getString("NOMBRE"))%></option>                           
-                                            <%
+                                            <?php
+                                            $sql = "SELECT cve_articulo,DESCRIPCION,nombre,ACTIVO FROM ARTICULOS WHERE ACTIVO = 1  ";
+                                            if ($area_sesion != 1) {
+                                                $sql .= "AND CVE_ARTICULO IN (SELECT cve_articulo FROM permisos WHERE activo = 1 AND cve_area = " . $area_sesion . " GROUP BY cve_articulo) ";
+                                            }
+                                            $sql .= "ORDER BY cve_articulo";
+                                            $rst = UtilDB::ejecutaConsulta($sql);
+                                            if ($rst->rowCount() != 0) {
+                                                foreach ($rst as $row) {
+                                                    ?>
+                                                    <option value="<?php echo($row["cve_articulo"]); ?>"><?php echo($row["nombre"]); ?></option>                           
+                                                    <?php
                                                 }
                                             } else {
-                                            %>
-                                            <option value="0" selected>No existen artículos.</option>
-                                            <%
-                                                }
-                                                rs.close();
-                                                rs = null;
-                                                sql = new StringBuilder();
-                                            %>                                        
+                                                ?>
+                                                <option value="0" selected>No existen artículos.</option>
+                                                <?php
+                                            }
+                                            $rst->closeCursor();
+                                            ?>                                        
                                         </select>
                                         <input type="hidden" name="xCveArticuloV" id="xCveArticuloV" value="0" style="width:5%" readonly="">
                                     </div>
@@ -194,14 +189,14 @@
 
         </div>
 
-        <jsp:include page="include-footer.jsp" />
-        <script src="${pageContext.request.contextPath}/js/jquery-3.2.1.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>        
-        <script src="${pageContext.request.contextPath}/js/bootstrap-datepicker.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/bootstrap-datepicker.es.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/jquery.dataTables.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/dataTables.bootstrap.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/infoITAIP.min.js"></script>
+        <?php require_once 'include-footer.php'; ?>
+        <script src="../js/jquery-3.2.1.min.js"></script>
+        <script src="../js/bootstrap.min.js"></script>        
+        <script src="../js/bootstrap-datepicker.min.js"></script>
+        <script src="../js/bootstrap-datepicker.es.min.js"></script>
+        <script src="../js/jquery.dataTables.min.js"></script>
+        <script src="../js/dataTables.bootstrap.min.js"></script>
+        <script src="../js/infoITAIP.min.js"></script>
         <script>
 
                                             var hoy = new Date();
@@ -266,7 +261,7 @@
                                                                         $("#xCveApartado").html("<option value='0'>---------- SELECCIONE UNA OPCIÓN -----------</option>")
                                                                         $("#xCveApartado").attr("disabled", true)
 
-                                                                        $.post("acciones.jsp", {cveArt: elegido, xAccion: "cargaComboFracciones"}, function (data) {
+                                                                        $.post("acciones.php", {cveArt: elegido, xAccion: "cargaComboFracciones"}, function (data) {
                                                                             $("#xCveFraccion").html(data);
                                                                             $("#xCveFraccion").attr("disabled", false)
                                                                         });
@@ -290,7 +285,7 @@
 
                                                                         var cveArt = $("#xCveArticuloV").val();
 
-                                                                        $.post("acciones.jsp", {cveArt: cveArt, cveFrac: elegido, xAccion: "cargaComboIncisos"}, function (data) {
+                                                                        $.post("acciones.php", {cveArt: cveArt, cveFrac: elegido, xAccion: "cargaComboIncisos"}, function (data) {
                                                                             $("#xCveInciso").html(data);
                                                                             $("#xCveInciso").attr("disabled", false)
                                                                         });
@@ -312,7 +307,7 @@
                                                                         var cveFrac = $("#xCveFraccionV").val();
                                                                         var cveInc = $("#xCveIncisoV").val();
 
-                                                                        $.post("acciones.jsp", {cveArt: cveArt, cveFrac: cveFrac, cveInc: cveInc, xAccion: "cargaComboApartado"}, function (data) {
+                                                                        $.post("acciones.php", {cveArt: cveArt, cveFrac: cveFrac, cveInc: cveInc, xAccion: "cargaComboApartado"}, function (data) {
                                                                             $("#xCveApartado").html(data);
                                                                             $("#xCveApartado").attr("disabled", false)
                                                                         });
@@ -409,25 +404,27 @@
                                                 }
 
                                                 var datos = $("#formDocumento").serialize();
+                                                datos += "&xAccion=grabaTransparencia&xPagina=1";
+                                                console.log(datos);
                                                 $.ajax(
                                                         {
-                                                            url: "acciones.jsp?xAccion=grabaTransparencia&xPagina=1", type: "POST", data: datos, success: function (result)
+                                                            url: "acciones.php", type: "POST", data: datos, success: function (result)
                                                             {
-                                                                var n = result.trim();
+                                                                /*var n = result.trim();
                                                                 var no = n.split('|');
                                                                 $("#alertaDocumento").html("<span class='custom entrar'>" + no[0] + "</span>");
                                                                 $("#xCveDocumento").val(no[1]);
                                                                 muestraDoctos();
                                                                 setTimeout(function () {
-                                                                    limpiar()();
-                                                                }, 2000);
+                                                                    limpiar();
+                                                                }, 2000);*/
                                                             }
                                                         }
                                                 );
                                             }
 
                                             function muestraDoctos() {
-                                                $.post("acciones.jsp", {xAccion: 'muestraDoctos', xPagina: 1}, function (data) {
+                                                $.post("acciones.php", {xAccion: 'muestraDoctos', xPagina: 1}, function (data) {
                                                     $("#muestraDocumentos").html(data);
                                                 });
                                             }
@@ -445,7 +442,7 @@
                                                     $("#xCveFraccion").val(data.xCveFraccion);
                                                     $("#xCveFraccionV").val(data.xCveFraccion);
 
-                                                    $.post("acciones.jsp", {cveArt: data.xCveArticulo, cveFrac: data.xCveFraccion, xAccion: "cargaComboFracciones"}, function (data) {
+                                                    $.post("acciones.php", {cveArt: data.xCveArticulo, cveFrac: data.xCveFraccion, xAccion: "cargaComboFracciones"}, function (data) {
                                                         $("#xCveFraccion").html(data);
                                                         $("#xCveFraccion").attr("disabled", false)
                                                     });
@@ -454,7 +451,7 @@
                                                     $("#xCveInciso").val(data.xCveInciso);
                                                     $("#xCveIncisoV").val(data.xCveInciso);
 
-                                                    $.post("acciones.jsp", {cveArt: data.xCveArticulo, cveFrac: data.xCveFraccion, cveInc: data.xCveInciso, xAccion: "cargaComboIncisos"}, function (data) {
+                                                    $.post("acciones.php", {cveArt: data.xCveArticulo, cveFrac: data.xCveFraccion, cveInc: data.xCveInciso, xAccion: "cargaComboIncisos"}, function (data) {
                                                         $("#xCveInciso").html(data);
                                                         $("#xCveInciso").attr("disabled", false)
                                                     });
@@ -464,7 +461,7 @@
                                                     $("#xCveApartadoV").val(data.xCveApartado);
                                                     $("#xCveUsuario").val(data.xCveUsuario);
 
-                                                    $.post("acciones.jsp", {cveArt: data.xCveArticulo, cveFrac: data.xCveFraccion, cveInc: data.xCveInciso, cveApa: data.xCveApartado, xAccion: "cargaComboApartado"}, function (data) {
+                                                    $.post("acciones.php", {cveArt: data.xCveArticulo, cveFrac: data.xCveFraccion, cveInc: data.xCveInciso, cveApa: data.xCveApartado, xAccion: "cargaComboApartado"}, function (data) {
                                                         $("#xCveApartado").html(data);
                                                         $("#xCveApartado").attr("disabled", false)
                                                     });
@@ -487,7 +484,7 @@
 
                                             function modalArchivos(cveDoc, nombre)
                                             {
-                                                $('#mMiModal').modal('show').find('.modal-content').load("frm-subir-archivo.jsp", {"xOrigen": "anexos", xcveDoc: cveDoc, nombre: nombre, xPagina: 1});
+                                                $('#mMiModal').modal('show').find('.modal-content').load("frm-subir-archivo.php", {"xOrigen": "anexos", xcveDoc: cveDoc, nombre: nombre, xPagina: 1});
                                             }
 
         </script>

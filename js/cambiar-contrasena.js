@@ -5,7 +5,7 @@ function cambiar()
     if (validar())
     {
         $("#msgbox").removeClass().addClass('messageboxinfo').text('Verificando ...').fadeIn(1000);
-        $.post("ajax-cambiar-contrasena.jsp",
+        $.post("ajax-cambiar-contrasena.php",
                 {xContrasenaActual: $('#txtContrasenaActual').val(),
                     xContrasenaNueva: $('#txtContrasenaNueva').val()
                 },

@@ -1,30 +1,21 @@
-<%-- 
-    Document   : informacion-publica
-    Created on : 23-mar-2017, 14:53:57
-    Author     : Roberto Eder Weiss Juárez
---%>
-
-<%@page import="java.util.Properties"%>
-<%@page import="java.util.Calendar"%>
-<%@page import="mx.edu.uttab.transparencia.comun.Resultados"%>
-<%@page import="mx.edu.uttab.transparencia.comun.UtilDB"%>
-<%@page contentType="text/html" pageEncoding="UTF-8" session="false"%>
-<%
-    String sql = "";
-    Resultados rst = null;
-    Resultados rst2 = null;
-    Resultados rst3 = null;
-    Resultados rst4 = null;
-    StringBuilder html = new StringBuilder();
-    StringBuilder html2 = new StringBuilder();
-    int count = 0;
-    int count2 = 0;
-    int anio_actual = Calendar.getInstance().get(Calendar.YEAR);
-    int mes_actual = Calendar.getInstance().get(Calendar.MONTH);
-    int trimestre_actual = getTrimestreActual(mes_actual);
-    int[] anios = {2015, 2016, 2017};
-    String[] trimestres = {"1er. Trimestre (enero-marzo)", "2do. Trimestre (abril-junio)", "3er. Trimestre (julio-septiembre)", "4to. Trimestre (octubre-diciembre)"};
-%>
+<?php
+require_once '../class/Area.php';
+$sql = "";
+$rst = NULL;
+$rst2 = NULL;
+$rst3 = NULL;
+$rst4 = NULL;
+$html = "";
+$html2 = "";
+$count = 0;
+$count2 = 0;
+$anio_actual = date("Y");
+$mes_actual = date("m");
+$trimestre_actual = getTrimestreActual($mes_actual);
+$anios = [2015, 2016, 2017];
+$trimestres = ["1er. Trimestre (enero-marzo)", "2do. Trimestre (abril-junio)", "3er. Trimestre (julio-septiembre)", "4to. Trimestre (octubre-diciembre)"];
+$origen = "informacion-publica";
+?>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -32,9 +23,9 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>UTTAB | Universidad Tecnológica de Tabasco</title>
-        <link href="${pageContext.request.contextPath}/img/favicon.ico" rel="icon" >
-        <link href="${pageContext.request.contextPath}/css/bootstrap.min.css" rel="stylesheet">
-        <link href="${pageContext.request.contextPath}/css/infoITAIP.min.css" rel="stylesheet"/>
+        <link href="../img/favicon.ico" rel="icon" >
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/infoITAIP.min.css" rel="stylesheet"/>
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -43,7 +34,7 @@
         <![endif]-->
         <style>
             body { 
-                background: url(${pageContext.request.contextPath}/img/fondo-pantalla.jpg) no-repeat  center 130px;
+                background: url(../img/fondo-pantalla.jpg) no-repeat  center 130px;
                 -webkit-background-size: cover;
                 -moz-background-size: cover;
                 -o-background-size: cover;
@@ -54,9 +45,7 @@
         </style>
     <body>
         <div class="container-fluid">
-            <jsp:include page="include-header.jsp">
-                <jsp:param name="o" value="informacion-publica" />
-            </jsp:include>
+            <?php require_once 'include-header.php'; ?>
             <div class="row">
                 <div class="col-md-12">&nbsp;</div>
             </div>
@@ -69,131 +58,130 @@
                         </div>
                         <div class="panel-body">
                             <div class="form-group">
-                                <%  sql = "SELECT * FROM articulos WHERE activo = 1 ORDER BY cve_articulo ASC";
-                                    rst = UtilDB.ejecutaConsulta(sql);
+                                <?php
+                                $sql = "SELECT * FROM articulos WHERE activo = 1 ORDER BY cve_articulo ASC";
+                                $rst = UtilDB::ejecutaConsulta($sql);
 
-                                    if (rst.recordCount() != 0) {
-                                        html.append("<ul class=\"nav nav-tabs\">");
-                                        html2.append("<div class=\"tab-content\">");
-                                        while (rst.next()) {
-                                            html.append("<li ").append(count == 0 ? "class=\"active\"" : "").append("><a data-toggle=\"tab\" href=\"#articulo").append(rst.getInt("cve_articulo")).append("\"><span class=\"glyphicon glyphicon-tasks\"></span> ").append(rst.getString("nombre")).append("</a></li>");
-                                            
-                                            html2.append("<div id=\"articulo").append(rst.getInt("cve_articulo")).append("\" class=\"tab-pane fade ").append(count == 0 ? "in active" : "").append("\">");
-                                            html2.append("<p>").append(rst.getString("descripcion")).append("</p>");
-                                            sql = "SELECT * FROM fracciones WHERE activo = 1 AND cve_articulo = " + rst.getInt("cve_articulo") + " ORDER BY cve_fraccion ASC";
-                                            rst2 = UtilDB.ejecutaConsulta(sql);
+                                if ($rst->rowCount() != 0) {
+                                    $html .= "<ul class=\"nav nav-tabs\">";
+                                    $html2 .= "<div class=\"tab-content\">";
+                                    foreach ($rst as $row) {
+                                        $html .= "<li " . ($count == 0 ? "class=\"active\"" : "") . "><a data-toggle=\"tab\" href=\"#articulo" . $row["cve_articulo"] . "\"><span class=\"glyphicon glyphicon-tasks\"></span> " . $row["nombre"] . "</a></li>";
 
-                                            if (rst2.recordCount() != 0) {
-                                                html2.append("<div class=\"panel-group\" id=\"accordion-articulo-").append(rst.getInt("cve_articulo")).append("\">");
-                                                while (rst2.next()) {
-                                                    html2.append("<div class=\"panel panel-default\">");
-                                                    html2.append("<div class=\"panel-heading\">");
-                                                    html2.append("<h4 class=\"panel-title\">");
-                                                    html2.append("<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion-articulo-").append(rst.getInt("cve_articulo")).append("\" href=\"#collapse-fraccion-").append(rst2.getInt("cve_fraccion")).append("\">");
-                                                    html2.append("<span class=\"glyphicon glyphicon-bookmark\"></span> ").append(rst2.getString("nombre"));
-                                                    html2.append("</a>");
-                                                    html2.append("</h4>");
-                                                    html2.append("</div>");
-                                                    html2.append("<div id=\"collapse-fraccion-").append(rst2.getInt("cve_fraccion")).append("\" class=\"panel-collapse collapse ").append(count2 == 0 ? "in" : "").append("\">");
-                                                    //html2.append("<div id=\"collapse-fraccion-").append(rst2.getInt("cve_fraccion")).append("\" class=\"panel-collapse collapse \">");
-                                                    html2.append("<div class=\"panel-body\">");
-                                                    html2.append("<p>").append(rst2.getString("descripcion")).append("</p><br/><br/>");
+                                        $html2 .= "<div id=\"articulo" . $row["cve_articulo"] . "\" class=\"tab-pane fade " . ($count == 0 ? "in active" : "") . "\">";
+                                        $html2 .= "<p>" . $row["descripcion"] . "</p>";
+                                        $sql = "SELECT * FROM fracciones WHERE activo = 1 AND cve_articulo = " . $row["cve_articulo"] . " ORDER BY cve_fraccion ASC";
+                                        $rst2 = UtilDB::ejecutaConsulta($sql);
 
-                                                    sql = "SELECT * FROM incisos WHERE cve_articulo = " + rst.getInt("cve_articulo") + " AND cve_fraccion = " + rst2.getInt("cve_fraccion") + " AND activo = 1 ORDER BY cve_inciso ASC";
-                                                    rst3 = UtilDB.ejecutaConsulta(sql);
+                                        if ($rst2->rowCount() != 0) {
+                                            $html2 .= "<div class=\"panel-group\" id=\"accordion-articulo-" . $row["cve_articulo"] . "\">";
+                                            foreach ($rst2 as $row2) {
+                                                $html2 .= "<div class=\"panel panel-default\">";
+                                                $html2 .= "<div class=\"panel-heading\">";
+                                                $html2 .= "<h4 class=\"panel-title\">";
+                                                $html2 .= "<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion-articulo-" . $row["cve_articulo"] . "\" href=\"#collapse-fraccion-" . $row2["cve_fraccion"] . "\">";
+                                                $html2 .= "<span class=\"glyphicon glyphicon-bookmark\"></span> " . $row2["nombre"];
+                                                $html2 .= "</a>";
+                                                $html2 .= "</h4>";
+                                                $html2 .= "</div>";
+                                                $html2 .= "<div id=\"collapse-fraccion-" . $row2["cve_fraccion"] . "\" class=\"panel-collapse collapse " . ($count2 == 0 ? "in" : "") . "\">";
+                                                //$html2 .= "<div id=\"collapse-fraccion-".$row2["cve_fraccion"]."\" class=\"panel-collapse collapse \">";
+                                                $html2 .= "<div class=\"panel-body\">";
+                                                $html2 .= "<p>" . $row2["descripcion"] . "</p><br/><br/>";
 
-                                                    if (rst3.recordCount() != 0) {
-                                                        html2.append("<div class=\"panel-group\" id=\"accordion-incisos-").append(rst2.getInt("cve_fraccion")).append("\">");
-                                                        while (rst3.next()) {
-                                                            html2.append("<div class=\"panel panel-success\">");
-                                                            html2.append("<div class=\"panel-heading\">");
-                                                            html2.append("<h4 class=\"panel-title\">");
-                                                            html2.append("<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion-incisos-").append(rst2.getInt("cve_fraccion")).append("\" href=\"#collapse-inciso-").append(rst3.getInt("cve_inciso")).append("\">");
-                                                            html2.append("<span class=\"glyphicon glyphicon-asterisk\"></span> ").append(rst3.getString("descripcion"));
-                                                            html2.append("</a>");
-                                                            html2.append("</h4>");
-                                                            html2.append("</div>");
-                                                            html2.append("<div id=\"collapse-inciso-").append(rst3.getInt("cve_inciso")).append("\" class=\"panel-collapse collapse \">");
-                                                            html2.append("<div class=\"panel-body\">");
+                                                $sql = "SELECT * FROM incisos WHERE cve_articulo = " . $row["cve_articulo"] . " AND cve_fraccion = " . $row2["cve_articulo"] . " AND activo = 1 ORDER BY cve_inciso ASC";
+                                                $rst3 = UtilDB::ejecutaConsulta($sql);
 
-                                                            sql = "SELECT * FROM apartados WHERE cve_articulo = " + rst.getInt("cve_articulo") + " AND cve_fraccion = " + rst2.getInt("cve_fraccion") + " AND cve_inciso = " + rst3.getInt("cve_inciso") + " AND activo = 1 ORDER BY cve_apartado ASC";
-                                                            rst4 = UtilDB.ejecutaConsulta(sql);
+                                                if ($rst3->rowCount() != 0) {
+                                                    $html2 .= "<div class=\"panel-group\" id=\"accordion-incisos-" . $row2["cve_fraccion"] . "\">";
+                                                    foreach ($rst3 as $row3) {
+                                                        $html2 .= "<div class=\"panel panel-success\">";
+                                                        $html2 .= "<div class=\"panel-heading\">";
+                                                        $html2 .= "<h4 class=\"panel-title\">";
+                                                        $html2 .= "<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion-incisos-" . $row2["cve_fraccion"] . "\" href=\"#collapse-inciso-" . $row3["cve_inciso"] . "\">";
+                                                        $html2 .= "<span class=\"glyphicon glyphicon-asterisk\"></span> " . $row3["descripcion"];
+                                                        $html2 .= "</a>";
+                                                        $html2 .= "</h4>";
+                                                        $html2 .= "</div>";
+                                                        $html2 .= "<div id=\"collapse-inciso-" . $row3["cve_inciso"] . "\" class=\"panel-collapse collapse \">";
+                                                        $html2 .= "<div class=\"panel-body\">";
 
-                                                            if (rst4.recordCount() != 0) {
-                                                                html2.append(" <div class=\"panel-group\" id=\"accordion-apartados-").append(rst3.getInt("cve_inciso")).append("\">");
-                                                                while (rst4.next()) {
-                                                                    html2.append("<div class=\"panel panel-info\">");
-                                                                    html2.append("<div class=\"panel-heading\">");
-                                                                    html2.append("<h4 class=\"panel-title\">");
-                                                                    html2.append("<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion-apartados-").append(rst3.getInt("cve_inciso")).append("\" href=\"#collapse-apartado-").append(rst4.getInt("cve_apartado")).append("\">");
-                                                                    html2.append("<span class=\"glyphicon glyphicon-th-list\"></span> ").append(rst4.getString("descripcion"));
-                                                                    html2.append("</a>");
-                                                                    html2.append("</h4>");
-                                                                    html2.append("</div>");
-                                                                    html2.append("<div id=\"collapse-apartado-").append(rst4.getInt("cve_apartado")).append("\" class=\"panel-collapse collapse\">");
-                                                                    html2.append("<div class=\"panel-body\">");
-                                                                    html2.append(getAniosTrimestres(rst.getInt("cve_articulo"), rst2.getInt("cve_fraccion"), rst3.getInt("cve_inciso"), rst4.getInt("cve_apartado"), "panel-default", anio_actual, mes_actual, trimestre_actual, anios, trimestres));
-                                                                    html2.append("</div>");
-                                                                    html2.append("</div>");
-                                                                    html2.append("</div>");
-                                                                }
-                                                                html2.append("</div>");
-                                                            } else {
-                                                                html2.append(getAniosTrimestres(rst.getInt("cve_articulo"), rst2.getInt("cve_fraccion"), rst3.getInt("cve_inciso"), 0, "panel-info", anio_actual, mes_actual, trimestre_actual, anios, trimestres));
+                                                        $sql = "SELECT * FROM apartados WHERE cve_articulo = " . $row["cve_articulo"] . " AND cve_fraccion = " . $row2["cve_fraccion"] . " AND cve_inciso = " . $row2["cve_inciso"] . " AND activo = 1 ORDER BY cve_apartado ASC";
+                                                        $rst4 = UtilDB::ejecutaConsulta($sql);
+
+                                                        if ($rst4->rowCount() != 0) {
+                                                            $html2 .= " <div class=\"panel-group\" id=\"accordion-apartados-" . $row3["cve_inciso"] . "\">";
+                                                            foreach ($rst4 as $row4) {
+                                                                $html2 .= "<div class=\"panel panel-info\">";
+                                                                $html2 .= "<div class=\"panel-heading\">";
+                                                                $html2 .= "<h4 class=\"panel-title\">";
+                                                                $html2 .= "<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#accordion-apartados-" . $row3["cve_inciso"] . "\" href=\"#collapse-apartado-" . $row4["cve_apartado"] . "\">";
+                                                                $html2 .= "<span class=\"glyphicon glyphicon-th-list\"></span> " . $row4["descripcion"];
+                                                                $html2 .= "</a>";
+                                                                $html2 .= "</h4>";
+                                                                $html2 .= "</div>";
+                                                                $html2 .= "<div id=\"collapse-apartado-" . ($row4["cve_apartado"]) . "\" class=\"panel-collapse collapse\">";
+                                                                $html2 .= "<div class=\"panel-body\">";
+                                                                $html2 .= (getAniosTrimestres($row["cve_articulo"], $row2["cve_fraccion"], $row3["cve_inciso"], $row4["cve_apartado"], "panel-default", $anio_actual, $mes_actual, $trimestre_actual, $anios, $trimestres));
+                                                                $html2 .= "</div>";
+                                                                $html2 .= "</div>";
+                                                                $html2 .= "</div>";
                                                             }
-                                                            rst4.close();
-
-                                                            html2.append("</div>");
-                                                            html2.append("</div>");
-                                                            html2.append("</div>");
-
+                                                            $html2 .= "</div>";
+                                                        } else {
+                                                            $html2 .= (getAniosTrimestres($row["cve_articulo"], $row2["cve_fraccion"], $row3["cve_inciso"], 0, "panel-info", $anio_actual, $mes_actual, $trimestre_actual, $anios, $trimestres));
                                                         }
-                                                        html2.append("</div>");
+                                                        $rst4->closeCursor();
 
-                                                    } else {
-                                                        html2.append(getAniosTrimestres(rst.getInt("cve_articulo"), rst2.getInt("cve_fraccion"), 0, 0, "panel-success", anio_actual, mes_actual, trimestre_actual, anios, trimestres));
+                                                        $html2 .= "</div>";
+                                                        $html2 .= "</div>";
+                                                        $html2 .= "</div>";
                                                     }
-
-                                                    rst3.close();
-
-                                                    html2.append("</div>");
-                                                    html2.append("</div>");
-                                                    html2.append("</div>");
-                                                    count2++;
+                                                    $html2 .= "</div>";
+                                                } else {
+                                                    $html2 .= (getAniosTrimestres($row["cve_articulo"], $row2["cve_fraccion"], 0, 0, "panel-success", $anio_actual, $mes_actual, $trimestre_actual, $anios, $trimestres));
                                                 }
-                                                html2.append("</div>");
-                                                count2 = 0;
 
+                                                $rst3->closeCursor();
+
+                                                $html2 .= "</div>";
+                                                $html2 .= "</div>";
+                                                $html2 .= "</div>";
+                                                $count2++;
                                             }
-
-                                            rst2.close();
-
-                                            html2.append("</div>");
-                                            count++;
+                                            $html2 .= "</div>";
+                                            $count2 = 0;
                                         }
-                                        html.append("</div>");
-                                        html.append("</ul>");
-                                        html.append(html2);
-                                        count = 0;
 
-                                        out.println(html.toString());
+                                        $rst2->closeCursor();
 
-                                        rst.close();
-                                    } else {
-                                        html.append("<h3 class=\"text-center text-uppercase\">No hay datos para mostrar por el momento</h3>");
+                                        $html2 .= "</div>";
+                                        $count++;
                                     }
+                                    $html .= "</div>";
+                                    $html .= "</ul>";
+                                    $html .= $html2;
+                                    $count = 0;
 
-                                %>
+
+
+                                    $rst->closeCursor();
+                                } else {
+                                    $html .= "<h3 class=\"text-center text-uppercase\">No hay datos para mostrar por el momento</h3>";
+                                }
+
+                                echo($html);
+                                ?>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <jsp:include page="include-footer.jsp" />
-        <script src="${pageContext.request.contextPath}/js/jquery-2.2.4.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>        
-        <script src="${pageContext.request.contextPath}/js/infoITAIP.min.js"></script>
+        <?php require_once 'include-footer.php'; ?>
+        <script src="../js/jquery-2.2.4.min.js"></script>
+        <script src="../js/bootstrap.min.js"></script>        
+        <script src="../js/infoITAIP.min.js"></script>
         <script>
             var accordion = "";
             var articulo = 0;
@@ -216,7 +204,7 @@
                         trimestre = parseInt(accordion.substring(accordion.indexOf("trim") + 5, accordion.indexOf("trim") + 7));
                         //console.log(accordion);
                         //console.log("articulo:"+articulo+",fraccion:"+fraccion+",inciso:"+inciso+",apartado:"+apartado+",año:"+anio+",trimestre:"+trimestre);
-                        $('#' + accordion + " div.panel-body").load("ajax-informacion-publica.jsp", {"xAccion": "getDocumentos", "xPageContext":"${pageContext.request.contextPath}","xArticulo": articulo, "xFraccion": fraccion, "xInciso": inciso, "xApartado": apartado, "xAnio": anio, "xTrimestre": trimestre});
+                        $('#' + accordion + " div.panel-body").load("ajax-informacion-publica.php", {"xAccion": "getDocumentos", "xPageContext": "...", "xArticulo": articulo, "xFraccion": fraccion, "xInciso": inciso, "xApartado": apartado, "xAnio": anio, "xTrimestre": trimestre});
 
                     });
                 });
@@ -224,63 +212,63 @@
         </script>
     </body>
 </html>
-<%!
-    public int getTrimestreActual(int mes) {
-        int trimestre = 0;
-        if (mes >= 0 && mes < 3) {
-            trimestre = 1;
-        } else if (mes >= 3 && mes < 6) {
-            trimestre = 2;
-        } else if (mes >= 6 && mes < 9) {
-            trimestre = 3;
-        } else {
-            trimestre = 4;
-        }
-        return trimestre;
+<?php
+
+function getTrimestreActual($mes) {
+    $trimestre = 0;
+    if ($mes >= 0 and $mes < 3) {
+        $trimestre = 1;
+    } elseif ($mes >= 3 and $mes < 6) {
+        $trimestre = 2;
+    } elseif ($mes >= 6 and $mes < 9) {
+        $trimestre = 3;
+    } else {
+        $trimestre = 4;
     }
+    return $trimestre;
+}
 
-    public StringBuilder getAniosTrimestres(int art, int frac, int inc, int apt, String panel_style, int anio_actual, int mes_actual, int trimestre_actual, int[] anios, String[] trimestres) {
-        StringBuilder html = new StringBuilder();
-        StringBuilder html2 = new StringBuilder();
-        int count_trimestre = 0;
-        String identificador = "art-" + (art < 10 ? "0" + art : art) + "-frac-" + (frac < 10 ? "0" + frac : frac) + "-inc-" + (inc < 10 ? "0" + inc : inc) + "-apt-" + (apt < 10 ? "0" + apt : apt);
-        html.append("<ul class=\"nav nav-tabs\">");
-        html2.append("<div class=\"tab-content\">");
-        for (int anio : anios) {
-            html.append("<li ").append(anio == anio_actual ? "class=\"active\"" : "").append("><a data-toggle=\"tab\" href=\"#").append(identificador + "-tabs-anio-" + anio).append("\"><span class=\"glyphicon glyphicon-calendar\"></span> ").append(anio).append("</a></li>");
+function getAniosTrimestres($art, $frac, $inc, $apt, $panel_style, $anio_actual, $mes_actual, $trimestre_actual, $anios, $trimestres) {
+    $html = "";
+    $html2 = "";
+    $count_trimestre = 0;
+    $identificador = "art-" . ($art < 10 ? "0" . $art : $art) . "-frac-" . ($frac < 10 ? "0" . $frac : $frac) . "-inc-" . ($inc < 10 ? "0" . $inc : $inc) . "-apt-" . ($apt < 10 ? "0" . $apt : $apt);
+    $html .= "<ul class=\"nav nav-tabs\">";
+    $html2 .= "<div class=\"tab-content\">";
+    foreach ($anios as $anio) {
+        $html .= "<li " . ($anio == $anio_actual ? "class=\"active\"" : "") . "><a data-toggle=\"tab\" href=\"#" . ($identificador . "-tabs-anio-" . $anio) . "\"><span class=\"glyphicon glyphicon-calendar\"></span> " . $anio . "</a></li>";
 
-            html2.append("<div id=\"").append(identificador + "-tabs-anio-" + anio).append("\" class=\"tab-pane fade ").append(anio == anio_actual ? "in active" : "").append("\">");
-            html2.append("<br/><br/>");
-            html2.append("<div class=\"panel-group\" id=\"").append(identificador + "-accordion-anio-" + anio).append("\">");
+        $html2 .= "<div id=\"" . ($identificador . "-tabs-anio-" . $anio) . "\" class=\"tab-pane fade " . ($anio == $anio_actual ? "in active" : "") . "\">";
+        $html2 .= "<br/><br/>";
+        $html2 .= "<div class=\"panel-group\" id=\"" . ($identificador . "-accordion-anio-" . $anio) . "\">";
 
-            for (String trimestre : trimestres) {
-                html2.append("<div class=\"panel ").append(panel_style).append("\">");
-                html2.append("<div class=\"panel-heading\">");
-                html2.append("<h4 class=\"panel-title\">");
-                html2.append("<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#").append(identificador + "-accordion-anio-" + anio).append("\" href=\"#").append(identificador + "-collapse-anio-" + anio + "-trim-0" + (count_trimestre + 1)).append("\">");
-                html2.append("<p><span class=\"glyphicon glyphicon-eye-open\"></span> ").append(trimestre).append("</p>");
-                html2.append("</a>");
-                html2.append("</h4>");
-                html2.append("</div>");
-                // HABILITAR LA LINEA QUE ESTA COMENTADA DEBAJO SI SE REQUIERE QUE ESTE ABIERTO POR DEFAULT EL TRIMESTRE ACTUAL EN EL AÑO ACTUAL
-                //html2.append("<div id=\"").append(identificador + "-collapse-anio-" + anio + "-trim-0" + (count_trimestre + 1)).append("\" class=\"panel-collapse collapse ").append(anio_actual == anio ? (trimestre_actual == count_trimestre + 1 ? "in" : "") : "").append("\">");
-                html2.append("<div id=\"").append(identificador + "-collapse-anio-" + anio + "-trim-0" + (count_trimestre + 1)).append("\" class=\"panel-collapse collapse \">");
-                html2.append("<div class=\"panel-body\">");
+        foreach ($trimestres as $trimestre) {
+            $html2 .= "<div class=\"panel " . $panel_style . "\">";
+            $html2 .= "<div class=\"panel-heading\">";
+            $html2 .= "<h4 class=\"panel-title\">";
+            $html2 .= "<a class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#" . ($identificador . "-accordion-anio-" . $anio) . "\" href=\"#" . ($identificador . "-collapse-anio-" . $anio . "-trim-0" . ($count_trimestre + 1)) . "\">";
+            $html2 .= "<p><span class=\"glyphicon glyphicon-eye-open\"></span> " . $trimestre . "</p>";
+            $html2 .= "</a>";
+            $html2 .= "</h4>";
+            $html2 .= "</div>";
+            // HABILITAR LA LINEA QUE ESTA COMENTADA DEBAJO SI SE REQUIERE QUE ESTE ABIERTO POR DEFAULT EL TRIMESTRE ACTUAL EN EL AÑO ACTUAL
+            //$html2 .= "<div id=\"".($identificador . "-collapse-anio-" . $anio . "-trim-0" . ($count_trimestre + 1))."\" class=\"panel-collapse collapse ".($anio_actual == $anio ? ($trimestre_actual == $count_trimestre + 1 ? "in" : "") : "")."\">";
+            $html2 .= "<div id=\"" . ($identificador . "-collapse-anio-" . $anio . "-trim-0" . ($count_trimestre + 1)) . "\" class=\"panel-collapse collapse \">";
+            $html2 .= "<div class=\"panel-body\">";
 
-                html2.append("</div>");
-                html2.append("</div>");
-                html2.append("</div>");
-                count_trimestre++;
-            }
-            count_trimestre = 0;
-            html2.append("</div>");
-            html2.append("</div>");
+            $html2 .= "</div>";
+            $html2 .= "</div>";
+            $html2 .= "</div>";
+            $count_trimestre++;
         }
-        html2.append("</div>");
-        html.append("</ul>");
-        html.append(html2);
-
-        return html;
-
+        $count_trimestre = 0;
+        $html2 .= "</div>";
+        $html2 .= "</div>";
     }
-%>
+    $html2 .= "</div>";
+    $html .= "</ul>";
+    $html .= $html2;
+
+    return $html;
+}
+?>

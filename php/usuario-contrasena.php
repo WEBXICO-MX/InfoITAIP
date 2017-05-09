@@ -1,18 +1,15 @@
-<%-- 
-    Document   : usuario-contrasena
-    Created on : 23-mar-2017, 10:23:45
-    Author     : Roberto Eder Weiss Juárez
---%>
-<%@page import="mx.edu.uttab.transparencia.comun.Sesiones"%>
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
-<%  HttpSession httpSession = request.getSession(false);
+<?php
+session_start();
+require_once '../class/Area.php';
 
-    if (httpSession.getAttribute(Sesiones.USUARIO) == null) {
-        response.sendRedirect("../index.jsp");
-        return;
-    }
+if (!isset($_SESSION['usr'])) {
+    header('Location: ../index.php');
+    die();
+    return;
+}
 
-%>
+$origen = "usuario-contrasena";
+?>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -20,10 +17,10 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>UTTAB | Universidad Tecnológica de Tabasco</title>
-        <link href="${pageContext.request.contextPath}/img/favicon.ico" rel="icon" >
-        <link href="${pageContext.request.contextPath}/css/bootstrap.min.css" rel="stylesheet">
-        <link href="${pageContext.request.contextPath}/css/login.min.css" rel="stylesheet"/>
-        <link href="${pageContext.request.contextPath}/css/infoITAIP.min.css" rel="stylesheet"/>
+        <link href="../img/favicon.ico" rel="icon" >
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/login.min.css" rel="stylesheet"/>
+        <link href="../css/infoITAIP.min.css" rel="stylesheet"/>
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -32,9 +29,7 @@
         <![endif]-->
     <body>
         <div class="container-fluid">
-            <jsp:include page="include-header.jsp">
-                <jsp:param name="o" value="usuario-contrasena" />
-            </jsp:include>
+            <?php require_once 'include-header.php'; ?>
             <div class="row">
                 <div class="col-md-12">&nbsp;</div>
             </div>
@@ -71,10 +66,10 @@
                 </div>
             </div>
         </div>
-        <jsp:include page="include-footer.jsp" />
-        <script src="${pageContext.request.contextPath}/js/jquery-3.2.1.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>        
-        <script src="${pageContext.request.contextPath}/js/cambiar-contrasena.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/infoITAIP.min.js"></script>
+        <?php require_once 'include-footer.php'; ?>
+        <script src="../js/jquery-3.2.1.min.js"></script>
+        <script src="../js/bootstrap.min.js"></script>        
+        <script src="../js/cambiar-contrasena.min.js"></script>
+        <script src="../js/infoITAIP.min.js"></script>
     </body>
 </html>

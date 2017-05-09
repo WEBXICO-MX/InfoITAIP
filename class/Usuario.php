@@ -6,6 +6,7 @@
  * @see {@link http://webxico.blogspot.mx/}
  */
 require_once('UtilDB.php');
+require_once('ChromePhp.php');
 
 class Usuario {
 
@@ -42,7 +43,7 @@ class Usuario {
 
     private function limpiar() {
         $this->cveUsuario = 0;
-        $this->cveArea = 0;
+        $this->cveArea = NULL;
         $this->nombreCompleto = "";
         $this->login = '';
         $this->password = '';

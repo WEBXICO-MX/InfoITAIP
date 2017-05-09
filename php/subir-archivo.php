@@ -1,24 +1,19 @@
-<%-- 
-    Document   : subir-archivo
-    Created on : 27-mar-2017, 10:29:58
-    Author     : Roberto Eder Weiss Juárez
---%>
-
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%
+<?php
     
-    if (request.getParameter("txtOrigen") != null) {
-        String origen = request.getParameter("txtOrigen");
-        int cveDoc = Integer.parseInt(request.getParameter("txtDoc"));
+    if (isset($_POST["txtOrigen"])) {
+        $origen = $_POST["txtOrigen"];
+        $cveDoc = (int) $_POST["txtDoc"];
         
-        if (origen.equals("transparencia")) {
-            response.sendRedirect("transparencia.jsp");
+        if ($origen === "transparencia") {
+            header("Location: transparencia.php");
+            die();
             return;
         }
-        if (origen.equals("anexos")) {
-            response.sendRedirect("anexos.jsp");
+        if ($origen === "anexos") {
+            header("Location: anexos.php");
+            die();
             return;
         }
 
     }
-%>
+?>

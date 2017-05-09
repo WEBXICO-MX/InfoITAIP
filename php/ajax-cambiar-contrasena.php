@@ -1,46 +1,30 @@
-<%-- 
-    Document   : ajax-cambiar-contrasena
-    Created on : 23-mar-2017, 13:06:59
-    Author     : Roberto Eder Weiss Juárez
---%>
+<?php
 
-<%@page import="mx.edu.uttab.transparencia.base.HistorialCambioContrasena"%>
-<%@page import="mx.edu.uttab.transparencia.comun.ErrorSistema"%>
-<%@page import="mx.edu.uttab.transparencia.comun.Sesiones"%>
-<%@page import="mx.edu.uttab.transparencia.base.Usuarios"%>
-<%@page import="org.json.simple.JSONObject"%>
-<%@page contentType="application/json" pageEncoding="UTF-8" %>
-<%
-    HttpSession httpSession = request.getSession(false);
+session_start();
+header('Content-Type: application/json; charset=utf-8');
+require_once '../class/Area.php';
+require_once '../class/Usuario.php';
+require_once '../class/HistorialCambioContrasena.php';
 
-    Usuarios usr = new Usuarios(Integer.parseInt(httpSession.getAttribute(Sesiones.USUARIO).toString()));
-    HistorialCambioContrasena hcc = new HistorialCambioContrasena();
-    
-    JSONObject json = new JSONObject();
-    if (usr.getPass().equals(usr.encriptarContrasena(request.getParameter("xContrasenaActual")))) {
+$usr = new Usuario((int) $_SESSION['usr']);
+$hcc = new HistorialCambioContrasena();
+$json = "";
 
-        usr.setPass(request.getParameter("xContrasenaNueva"));
-        ErrorSistema err = usr.grabar();
-        if (err.getNumeroError() != 0) {
-            json.put("valido", new Boolean("false"));
-            json.put("msg", new String("La contraseña no se pudo modificar"));
-        } else {
-            json.put("valido", new Boolean("true"));
-            json.put("msg", new String("Contraseña actualizada con  exito"));
-            hcc.setCveUsuario(usr);
-            hcc.setContrasenaNueva(usr.encriptarContrasena(request.getParameter("xContrasenaNueva")));
-            hcc.setContrasenaAnterior(usr.encriptarContrasena(request.getParameter("xContrasenaActual")));
-            hcc.grabar();
-        }
+if ($usr->getPassword() === $_POST['xContrasenaActual']) {
 
-        out.print(json);
-        out.flush();
+    $usr->setPassword($_POST['xContrasenaNueva']);
 
+    if ($usr->grabar() !== 0) {
+        $json = '{"msg":"Contraseña actualizada con  exito","valido":true}';
+        $hcc->setCveUsuario($usr);
+        $hcc->setContrasenaNueva($_POST['xContrasenaNueva']);
+        $hcc->setContrasenaAnterior($_POST['xContrasenaActual']);
+        $hcc->grabar();
     } else {
-        json.put("valido", new Boolean("false"));
-        json.put("msg", new String("La contraseña no es correcta"));
-        out.print(json);
-        out.flush();
+        $json = '{"msg":"No se puedo realizar la actualización de la contraseña","valido":false}';
     }
-
-%>
+} else {
+    $json = '{"msg":"La contraseña no es correcta","valido":false}';
+}
+echo($json);
+?>

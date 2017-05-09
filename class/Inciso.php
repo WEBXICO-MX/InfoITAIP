@@ -6,6 +6,7 @@
  * @see {@link http://webxico.blogspot.mx/}
  */
 require_once('UtilDB.php');
+require_once('ChromePhp.php');
 
 class Inciso {
 
@@ -39,7 +40,7 @@ class Inciso {
     function __construct1(Articulo $xCveArticulo, Fraccion $xCveFraccion, $xCveInciso) {
         $this->limpiar();
         $this->cveArticulo = $xCveArticulo;
-        $this->cvefraccion = $xCveFraccion;
+        $this->cveFraccion = $xCveFraccion;
         $this->cveInciso = $xCveInciso;
         $this->cargar();
     }
@@ -127,9 +128,8 @@ class Inciso {
     }
 
     function cargar() {
-        $sql = "SELECT * FROM incisos WHERE cve_articulo = " . $this->cveArticulo->getCveArticulo() . " AND cve_fraccion = " + $this->cveFraccion->getCveFraccion() . " AND cve_inciso = $this->cveInciso";
+        $sql = "SELECT * FROM incisos WHERE cve_articulo = " . $this->cveArticulo->getCveArticulo() . " AND cve_fraccion = " . $this->cveFraccion->getCveFraccion() . " AND cve_inciso = $this->cveInciso";
         $rst = UtilDB::ejecutaConsulta($sql);
-
         foreach ($rst as $row) {
             $this->cveArticulo = new Articulo($row['cve_articulo']);
             $this->cveFraccion = new Fraccion($this->cveArticulo, $row['cve_fraccion']);

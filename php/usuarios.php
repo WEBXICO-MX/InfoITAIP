@@ -6,13 +6,12 @@ require_once '../class/Usuario.php';
 
 $area = isset($_SESSION['area']) ? (int) $_SESSION['area'] : 0;
 $origen = "usuario";
-ChromePhp::log($area);
 
-/*if (isset($_SESSION['usr']) or $area != 1) {
+if (!isset($_SESSION['usr']) or $area != 1) {
     header('Location: ../index.php');
     die();
     return;
-}*/
+}
 
 $sql = "";
 $rst = NULL;
@@ -30,7 +29,7 @@ if ($accion === "grabar") {
         $usuario->setLogin($_POST['txtLogin']);
         $usuario->setPassword($_POST['txtPassword']);
     }
-    $usuario->setActivo(isset($_POST['cbxActivo']));
+    $usuario->setActivo(isset($_POST['cbxActivo']) ? 1:0);
 
     if ($usuario->grabar() !== 0) {
         $grabo = true;
@@ -56,7 +55,7 @@ if ($accion === "grabar") {
         <![endif]-->
     <body>
         <div class="container-fluid">
-<?php require_once 'include-header.php'; ?>
+            <?php require_once 'include-header.php'; ?>
             <div class="row">
                 <div class="col-md-12">&nbsp;</div>
             </div>
@@ -70,26 +69,26 @@ if ($accion === "grabar") {
                             <div class="form-group">
                                 <form action="" name="frmUsuario" id="frmUsuario" method="post">
                                     <div class="form-group">
-                                        <input type="hidden" name="xCveUsuario" id="xCveUsuario" value="<%= usuario.getCveUsuario()%>" />
+                                        <input type="hidden" name="xCveUsuario" id="xCveUsuario" value="<?php echo($usuario->getCveUsuario()); ?>" />
                                         <input type="hidden" name="xAccion" id="xAccion" value="0" />
                                         <label for="cmbArea">Área:</label>
                                         <select name="cmbArea" id="cmbArea" class="form-control">                                            
                                             <option value="0">---------- SELECCIONE UNA OPCIÓN -----------</option>
-<?php
-$sql = "SELECT * FROM areas WHERE activo = 1 ORDER BY descripcion";
-$rst = UtilDB::ejecutaConsulta($sql);
-foreach ($rst as $row) {
-    echo("<option value=\"" . $row['cve_area'] . "\" " . ($usuario->getCveArea()->getCveArea() === $row['cve_area'] ? "selected" : "") + ">" . $row['descripcion'] . "</option>");
-}
-$rst->closeCursor();
-?>
+                                            <?php
+                                            $sql = "SELECT * FROM areas WHERE activo = 1 ORDER BY descripcion";
+                                            $rst = UtilDB::ejecutaConsulta($sql);
+                                            foreach ($rst as $row) {
+                                                echo("<option value=\"" . $row['cve_area'] . "\" " . ($usuario->getCveArea() != NULL ? ($usuario->getCveArea()->getCveArea() === $row['cve_area'] ? "selected" : ""):"") . ">" . $row['descripcion'] . "</option>");
+                                            }
+                                            $rst->closeCursor();
+                                            ?>
                                         </select>
                                     </div>
                                     <div class="form-group">
                                         <label for="txtNombre">Nombre completo:</label>
                                         <input name="txtNombre" id="txtNombre" type="text" class="form-control" value="<?php echo($usuario->getNombreCompleto()); ?>" maxlength="100">
                                     </div>
-<?php if ($usuario->getCveArea()->getCveArea() === 0) { ?>
+                                        <?php if ($usuario->getCveArea() === NULL or $usuario->getCveArea()->getCveArea() === 0) { ?>
                                         <div class="form-group">
                                             <label for="txtLogin">Usuario:</label>
                                             <input name="txtLogin" id="txtLogin" type="text" class="form-control" value="<?php echo($usuario->getLogin()); ?>" maxlength="30">
@@ -102,7 +101,7 @@ $rst->closeCursor();
                                             <label for="txtPassword2">Ingrese nuevamente la contraseña:</label>
                                             <input name="txtPassword2" id="txtPassword2" type="password" class="form-control" value="" maxlength="10">
                                         </div>
-    <?php } ?>
+                                         <?php } ?>
                                         <div class="checkbox">
                                             <label>
                                                 <input type="checkbox" name="cbxActivo" id="cbxActivo" value="1"  <?php echo($usuario->getCveUsuario() !== 0 ? ($usuario->getActivo() ? "checked" : "") : "checked"); ?>/>
@@ -145,20 +144,20 @@ $rst->closeCursor();
                                             </tr>
                                         </thead>
                                         <tbody>
-    <?php
-    $sql = "SELECT u.cve_usuario,u.nombre_completo, a.descripcion AS area, u.activo FROM usuarios AS u INNER JOIN areas AS a ON a.cve_area = u.cve_area ORDER BY nombre_completo";
-    $rst = UtilDB::ejecutaConsulta($sql);
-    foreach ($rst as $row) {
-        echo("<tr>");
-        echo("<td>" . ( ++$count) . "</td>");
-        echo("<td><a href=\"javascript:void(0);\" onclick=\"cargar(" . $row['cve_usuario'] . ");\">" . rst . getString("nombre_completo") . "</a></td>");
-        echo("<td>" . $row["area"] . "</td>");
-        echo("<td>" . ($row["activo"] ? "<span class=\"glyphicon glyphicon-ok-circle\"></span>" : "<span class=\"glyphicon glyphicon-remove-circle\"></span>") . "</td>");
-        echo("</tr>");
-    }
-    $rst->closeCursor();
-    $count = 0;
-    ?>
+                                        <?php
+                                        $sql = "SELECT u.cve_usuario,u.nombre_completo, a.descripcion AS area, u.activo FROM usuarios AS u INNER JOIN areas AS a ON a.cve_area = u.cve_area ORDER BY cve_usuario DESC";
+                                        $rst = UtilDB::ejecutaConsulta($sql);
+                                        foreach ($rst as $row) {
+                                            echo("<tr>");
+                                            echo("<td>" . ( ++$count) . "</td>");
+                                            echo("<td><a href=\"javascript:void(0);\" onclick=\"cargar(" . $row['cve_usuario'] . ");\">" . $row['nombre_completo'] . "</a></td>");
+                                            echo("<td>" . $row["area"] . "</td>");
+                                            echo("<td>" . ($row["activo"] ? "<span class=\"glyphicon glyphicon-ok-circle\"></span>" : "<span class=\"glyphicon glyphicon-remove-circle\"></span>") . "</td>");
+                                            echo("</tr>");
+                                        }
+                                        $rst->closeCursor();
+                                        $count = 0;
+                                        ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -168,28 +167,28 @@ $rst->closeCursor();
                     </div>
                 </div>    
             </div>
-    <?php require_once 'php/include-footer.php'; ?>
-            <script src="${pageContext.request.contextPath}/js/jquery-3.2.1.min.js"></script>
-            <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>        
-            <script src="${pageContext.request.contextPath}/js/jquery.dataTables.min.js"></script>
-            <script src="${pageContext.request.contextPath}/js/dataTables.bootstrap.min.js"></script>
-            <script src="${pageContext.request.contextPath}/js/infoITAIP.min.js"></script>
+            <?php require_once 'include-footer.php'; ?>
+            <script src="../js/jquery-3.2.1.min.js"></script>
+            <script src="../js/bootstrap.min.js"></script>        
+            <script src="../js/jquery.dataTables.min.js"></script>     
+            <script src="../js/dataTables.bootstrap.min.js"></script>
+            <script src="../js/infoITAIP.min.js"></script>
             <script>
                                                 $(document).ready(function () {
 
                                                     $('#tabla_usuarios').DataTable();
 
-    <?php if ($grabo) { ?>
+                                                <?php if ($grabo) { ?>
                                                         $("#alert-ok").alert();
                                                         $("#alert-ok").fadeTo(2000, 700).slideUp(700, function () {
                                                             $("#alert-ok").slideUp(700);
                                                         });
-        <?php } elseif(!$grabo and $accion === "grabar"){ ?>
+                                                <?php } elseif(!$grabo and $accion === "grabar"){ ?>
                                                         $("#alert-ko").alert();
                                                         $("#alert-ko").fadeTo(2000, 700).slideUp(700, function () {
                                                             $("#alert-ko").slideUp(700);
                                                         });
-        <?php } ?>
+                                                <?php } ?>
 
                                             });
 

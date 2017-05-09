@@ -6,6 +6,7 @@
  * @see {@link http://webxico.blogspot.mx/}
  */
 require_once('UtilDB.php');
+require_once('ChromePhp.php');
 
 class Apartado {
 
@@ -44,9 +45,9 @@ class Apartado {
     function __construct1(Articulo $xCveArticulo, Fraccion $xCveFraccion, Inciso $xCveInciso, $xCveApartado) {
         $this->limpiar();
         $this->cveArticulo = $xCveArticulo;
-        $this->cvefraccion = $xCveFraccion;
+        $this->cveFraccion = $xCveFraccion;
         $this->cveInciso = $xCveInciso;
-        $this->cveInciso = $xCveApartado;
+        $this->cveApartado = $xCveApartado;
         $this->cargar();
     }
 
@@ -146,7 +147,7 @@ class Apartado {
     }
 
     function cargar() {
-        $sql = "SELECT * FROM apartados WHERE cve_articulo = " . $this->cveArticulo->getCveArticulo() . " AND cve_fraccion = " + $this->cveFraccion->getCveFraccion() . " AND cve_inciso = " . $this->cveInciso->getCveInciso() . " AND cve_apartado = $this->cveApartado";
+        $sql = "SELECT * FROM apartados WHERE cve_articulo = " . $this->cveArticulo->getCveArticulo() . " AND cve_fraccion = " . $this->cveFraccion->getCveFraccion() . " AND cve_inciso = " . $this->cveInciso->getCveInciso() . " AND cve_apartado = $this->cveApartado";
         $rst = UtilDB::ejecutaConsulta($sql);
 
         foreach ($rst as $row) {

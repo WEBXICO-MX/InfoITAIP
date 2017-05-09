@@ -1,6 +1,6 @@
 <?php
-
 session_start();
+require_once 'class/Area.php';
 
 if (isset($_SESSION['usr'])) {
     header('Location: php/elegir-anio-trimestre.php');

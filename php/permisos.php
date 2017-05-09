@@ -1,68 +1,52 @@
-<%-- 
-    Document   : permisos
-    Created on : 04-abr-2017, 13:34:32
-    Author     : Roberto Eder Weiss Juárez
---%>
+<?php
+session_start();
+require_once '../class/Area.php';
+require_once '../class/Articulo.php';
+require_once '../class/Fraccion.php';
+require_once '../class/Permiso.php';
 
-<%@page import="mx.edu.uttab.transparencia.base.Usuarios"%>
-<%@page import="mx.edu.uttab.transparencia.base.Fracciones"%>
-<%@page import="mx.edu.uttab.transparencia.base.Articulos"%>
-<%@page import="mx.edu.uttab.transparencia.base.Areas"%>
-<%@page import="mx.edu.uttab.transparencia.base.Permiso"%>
-<%@page import="mx.edu.uttab.transparencia.comun.ErrorSistema"%>
-<%@page import="mx.edu.uttab.transparencia.comun.Resultados"%>
-<%@page import="mx.edu.uttab.transparencia.comun.Sesiones"%>
-<%@page import="mx.edu.uttab.transparencia.comun.UtilDB"%>
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
-<%  HttpSession httpSession = request.getSession(false);
+$area = $_SESSION['area'] ? ((int) $_SESSION['area']) : 0;
+$origen = "permisos";
 
-    int area = httpSession.getAttribute(Sesiones.AREA) != null ? Integer.parseInt(httpSession.getAttribute(Sesiones.AREA).toString()) : 0;
+if (!isset($_SESSION['usr']) or $area != 1) {
+    header('Location: ../index.php');
+    die();
+    return;
+}
 
-    if (httpSession.getAttribute(Sesiones.USUARIO) == null || area != 1) {
-        response.sendRedirect("../index.jsp");
-        return;
+$rst = NULL;
+$sql = "";
+$grabo = false;
+$cargar = false;
+$count = 0;
+
+$accion = isset($_POST["xAccion"]) ? $_POST["xAccion"] : "";
+$xCveArea = isset($_POST["xCveArea"]) ? (int) $_POST["xCveArea"] : 0;
+$xCveArticulo = isset($_POST["xCveArticulo"]) ? (int) ($_POST["xCveArticulo"]) : 0;
+$xCveFraccion = isset($_POST["xCveFraccion"]) ? (int) $_POST["xCveFraccion"] : 0;
+
+$p = new Permiso(new Area($xCveArea), new Articulo($xCveArticulo), new Fraccion($xCveFraccion));
+
+if ($accion === "grabar") {
+    if ($p->getCveArea()->getCveArea() != 0 and $p->getCveArticulo()->getCveArticulo() != 0 and $p->getCveFraccion()->getCveFraccion() != 0) {
+        $p->setCveUsuario2(new Usuario((int) $_SESSION['usr']));
+        $p->setActivo(isset($_POST["cbxActivo"]) ? true : false);
+        $cargar = true;
+    } else {
+
+        $p->setCveArea(new Area((int) $_POST["cmbArea"]));
+        $p->setCveArticulo(new Articulo((int) $_POST["cmbArticulo"]));
+        $p->setCveFraccion(new Fraccion((int) $_POST["cmbFraccion"]));
+        $p->setCveUsuario(new Usuario((int) $_SESSION['usr']));
+        $p->setActivo(isset($_POST["cbxActivo"]) ? true : false);
     }
-
-    Resultados rst = null;
-    String sql = "";
-    boolean grabo = false;
-    boolean cargar = false;
-    int count = 0;
-
-    String accion = request.getParameter("xAccion") != null ? request.getParameter("xAccion") : "";
-    int xCveArea = request.getParameter("xCveArea") != null ? Integer.parseInt(request.getParameter("xCveArea")) : 0;
-    int xCveArticulo = request.getParameter("xCveArticulo") != null ? Integer.parseInt(request.getParameter("xCveArticulo")) : 0;
-    int xCveFraccion = request.getParameter("xCveFraccion") != null ? Integer.parseInt(request.getParameter("xCveFraccion")) : 0;
-    
-    Permiso p = new Permiso(new Areas(xCveArea), new Articulos(xCveArticulo), new Fracciones(xCveFraccion));
-    
-    if (accion.equals("grabar")) {
-        if (p.getCveArea().getCveArea() != 0 && p.getCveArticulo().getCveArticulo() != 0 && p.getCveFraccion().getCveFraccion() != 0) {
-            p.setCveUsuario2(new Usuarios(Integer.parseInt(httpSession.getAttribute(Sesiones.USUARIO).toString())));
-            p.setActivo(request.getParameter("cbxActivo") != null ? true : false);
-            cargar = true; 
-            
-        } else {            
-            
-            p.setCveArea(new Areas(Integer.parseInt(request.getParameter("cmbArea"))));
-            p.setCveArticulo(new Articulos(Integer.parseInt(request.getParameter("cmbArticulo"))));
-            p.setCveFraccion(new Fracciones(Integer.parseInt(request.getParameter("cmbFraccion"))));
-            p.setCveUsuario(new Usuarios(Integer.parseInt(httpSession.getAttribute(Sesiones.USUARIO).toString())));
-            p.setActivo(request.getParameter("cbxActivo") != null ? true : false);
-            
-        }
-        ErrorSistema err = p.grabar();
-        if (err.getNumeroError() == 0) {
-            grabo = true;
-        }
-
+    if ($p->grabar() !== 0) {
+        $grabo = true;
     }
-    else if(accion.equals("cargar"))
-    {
-      cargar = true;   
-    }
-
-%>
+} else if ($accion === "cargar") {
+    $cargar = true;
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -70,10 +54,10 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>UTTAB | Universidad Tecnológica de Tabasco</title>
-        <link href="${pageContext.request.contextPath}/img/favicon.ico" rel="icon" >
-        <link href="${pageContext.request.contextPath}/css/bootstrap.min.css" rel="stylesheet">
-        <link href="${pageContext.request.contextPath}/css/dataTables.bootstrap.min.css" rel="stylesheet"/>
-        <link href="${pageContext.request.contextPath}/css/infoITAIP.css" rel="stylesheet"/>
+        <link href="../img/favicon.ico" rel="icon" >
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/dataTables.bootstrap.min.css" rel="stylesheet"/>
+        <link href="../css/infoITAIP.css" rel="stylesheet"/>
         <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -83,9 +67,7 @@
     <body>
         <div class="container-fluid">
 
-            <jsp:include page="include-header.jsp">
-                <jsp:param name="o" value="permisos" />
-            </jsp:include>
+            <?php require_once 'include-header.php'; ?>
 
             <div class="row">
                 <div class="col-md-12">&nbsp;</div>
@@ -102,33 +84,35 @@
                                 <form action="" name="frmPermisos" id="frmPermisos" method="post">
                                     <div class="form-group">
                                         <input type="hidden" name="xAccion" id="xAccion" value="0" />
-                                        <input type="hidden" name="xCveArea" id="xCveArea" value="<%= p.getCveArea().getCveArea() != 0 ? (p.getCveArea().getCveArea()):"0" %>" />
-                                        <input type="hidden" name="xCveArticulo" id="xCveArticulo" value="<%= p.getCveArticulo().getCveArticulo() != 0 ? (p.getCveArticulo().getCveArticulo()):"0" %>" />
-                                        <input type="hidden" name="xCveFraccion" id="xCveFraccion" value="<%= p.getCveFraccion().getCveFraccion() != 0 ? (p.getCveFraccion().getCveFraccion()):"0" %>" />                                        
+                                        <input type="hidden" name="xCveArea" id="xCveArea" value="<?php echo($p->getCveArea()->getCveArea() != 0 ? ($p->getCveArea()->getCveArea()) : "0"); ?>" />
+                                        <input type="hidden" name="xCveArticulo" id="xCveArticulo" value="<?php echo($p->getCveArticulo()->getCveArticulo() != 0 ? ($p->getCveArticulo()->getCveArticulo()) : "0"); ?>" />
+                                        <input type="hidden" name="xCveFraccion" id="xCveFraccion" value="<?php echo($p->getCveFraccion()->getCveFraccion() != 0 ? ($p->getCveFraccion()->getCveFraccion()) : "0"); ?>" />                                        
                                         <label for="cmbArea">Área:</label>                                        
                                         <select id="cmbArea" name="cmbArea" class="form-control">
                                             <option value="0">---------- SELECCIONE UNA OPCIÓN -----------</option>
-                                            <%  sql = "SELECT * FROM areas WHERE activo = 1 AND cve_area NOT IN (1)  ORDER BY descripcion";
-                                                rst = UtilDB.ejecutaConsulta(sql);
-                                                
-                                                while (rst.next()) { 
-                                                    out.println("<option value=\"" + rst.getInt("cve_area") + "\" "+(p.getCveArea().getCveArea() != 0 ? (rst.getInt("cve_area") == p.getCveArea().getCveArea()? "selected":""):"")+">" + rst.getString("descripcion") + "</option>");
-                                                }
-                                                rst.close();
-                                            %>                                    
+                                            <?php
+                                            $sql = "SELECT * FROM areas WHERE activo = 1 AND cve_area NOT IN (1)  ORDER BY descripcion";
+                                            $rst = UtilDB::ejecutaConsulta($sql);
+
+                                            foreach ($rst as $row) {
+                                                echo("<option value=\"" . $row["cve_area"] . "\" " . ($p->getCveArea()->getCveArea() != 0 ? ($row["cve_area"] == $p->getCveArea()->getCveArea() ? "selected" : "") : "") . ">" . $row["descripcion"] . "</option>");
+                                            }
+                                            $rst->closeCursor();
+                                            ?>                                    
                                         </select>
                                     </div>
                                     <div class="form-group">
                                         <label for="cmbArticulo">Artículo:</label>
                                         <select id="cmbArticulo" name="cmbArticulo" class="form-control">
                                             <option value="0">---------- SELECCIONE UNA OPCIÓN -----------</option> 
-                                            <%  sql = "SELECT * FROM articulos WHERE activo = 1 ORDER BY descripcion";
-                                                rst = UtilDB.ejecutaConsulta(sql);
-                                                while (rst.next()) {
-                                                    out.println("<option value=\"" + rst.getInt("cve_articulo") + "\" "+(p.getCveArea().getCveArea() != 0 ? (rst.getInt("cve_articulo") == p.getCveArticulo().getCveArticulo()? "selected":""):"")+">" + rst.getString("nombre") + "</option>");
-                                                }
-                                                rst.close();
-                                            %>
+                                            <?php
+                                            $sql = "SELECT * FROM articulos WHERE activo = 1 ORDER BY descripcion";
+                                            $rst = UtilDB::ejecutaConsulta($sql);
+                                            foreach ($rst as $row) {
+                                                echo("<option value=\"" . $row["cve_articulo"] . "\" " . ($p->getCveArea()->getCveArea() != 0 ? ($row["cve_articulo"] == $p->getCveArticulo()->getCveArticulo() ? "selected" : "") : "") . ">" . $row["nombre"] . "</option>");
+                                            }
+                                            $rst->closeCursor();
+                                            ?>
                                         </select>
                                     </div>
                                     <div class="form-group">
@@ -139,7 +123,7 @@
                                     </div>
                                     <div class="checkbox">
                                         <label>
-                                            <input type="checkbox" name="cbxActivo" id="cbxActivo" value="1" <%= p.getCveArea().getCveArea() != 0 ? (p.isActivo() ? "checked":""):"checked" %>/>Activo
+                                            <input type="checkbox" name="cbxActivo" id="cbxActivo" value="1" <?php echo($p->getCveArea()->getCveArea() != 0 ? ($p->getActivo() ? "checked" : "") : "checked"); ?>/>Activo
                                         </label>
                                     </div> 
                                     <div class="form-group" style="text-align: center">
@@ -180,25 +164,26 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <% StringBuilder sql2 = new StringBuilder("SELECT p.cve_area,p.cve_articulo,p.cve_fraccion,a.descripcion AS area, art.nombre AS articulo, f.nombre AS fraccion, p.activo ");
-                                            sql2.append("FROM permisos AS p ");
-                                            sql2.append("INNER JOIN areas AS a ON a.cve_Area = p.cve_area ");
-                                            sql2.append("INNER JOIN articulos AS art ON art.cve_articulo = p.cve_articulo ");
-                                            sql2.append("INNER JOIN fracciones AS f ON f.cve_fraccion = p.cve_fraccion ");
-                                            rst = UtilDB.ejecutaConsulta(sql2.toString());
+                                        <?php
+                                        $sql2 = "SELECT p.cve_area,p.cve_articulo,p.cve_fraccion,a.descripcion AS area, art.nombre AS articulo, f.nombre AS fraccion, p.activo ";
+                                        $sql2 .= "FROM permisos AS p ";
+                                        $sql2 .= "INNER JOIN areas AS a ON a.cve_Area = p.cve_area ";
+                                        $sql2 .= "INNER JOIN articulos AS art ON art.cve_articulo = p.cve_articulo ";
+                                        $sql2 .= "INNER JOIN fracciones AS f ON f.cve_fraccion = p.cve_fraccion ";
+                                        $rst = UtilDB::ejecutaConsulta($sql2);
 
-                                            while (rst.next()) {
-                                                out.println("<tr>");
-                                                out.println("<td><a href=\"javascript:void(0);\" onclick=\"cargar(" + rst.getInt("cve_area") + "," + rst.getInt("cve_articulo") + "," + rst.getInt("cve_fraccion") + ");\">" + (++count) + "</a></td>");
-                                                out.println("<td>" + rst.getString("area") + "</td>");
-                                                out.println("<td>" + rst.getString("articulo") + "</td>");
-                                                out.println("<td>" + rst.getString("fraccion") + "</td>");
-                                                out.println("<td>" + (rst.getBoolean("activo") ? "<span class=\"glyphicon glyphicon-ok-circle\"></span>" : "<span class=\"glyphicon glyphicon-remove-circle\"></span>") + "</td>");
-                                                out.println("</tr>");
-                                            }
-                                            rst.close();
-                                            count = 0;
-                                        %>
+                                        foreach ($rst as $row) {
+                                            echo("<tr>");
+                                            echo("<td><a href=\"javascript:void(0);\" onclick=\"cargar(" . $row["cve_area"] . "," . $row["cve_articulo"] . "," . $row["cve_fraccion"] . ");\">" . ( ++$count) . "</a></td>");
+                                            echo("<td>" . $row["area"] . "</td>");
+                                            echo("<td>" . $row["articulo"] . "</td>");
+                                            echo("<td>" . $row["fraccion"] . "</td>");
+                                            echo("<td>" . ($row["activo"] ? "<span class=\"glyphicon glyphicon-ok-circle\"></span>" : "<span class=\"glyphicon glyphicon-remove-circle\"></span>") . "</td>");
+                                            echo("</tr>");
+                                        }
+                                        $rst->closeCursor();
+                                        $count = 0;
+                                        ?>
                                     </tbody>
                                 </table>
                             </div>
@@ -208,38 +193,35 @@
                 </div>
             </div> 
         </div>
-        <jsp:include page="include-footer.jsp" />
-        <script src="${pageContext.request.contextPath}/js/jquery-3.2.1.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>        
-        <script src="${pageContext.request.contextPath}/js/jquery.dataTables.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/dataTables.bootstrap.min.js"></script>
-        <script src="${pageContext.request.contextPath}/js/infoITAIP.min.js"></script>
+        <?php require_once 'include-footer.php'; ?>
+        <script src="../js/jquery-3.2.1.min.js"></script>
+        <script src="../js/bootstrap.min.js"></script>        
+        <script src="../js/jquery.dataTables.min.js"></script>
+        <script src="../js/dataTables.bootstrap.min.js"></script>
+        <script src="../js/infoITAIP.min.js"></script>
         <script>
 
                                             $(document).ready(function () {
 
                                                 $('#tabla_permisos').DataTable();
+                                                    <?php if ($grabo) { ?>
+                                                    $("#alert-ok").alert();
+                                                    $("#alert-ok").fadeTo(2000, 700).slideUp(700, function () {
+                                                        $("#alert-ok").slideUp(700);
+                                                    });
+                                                    <?php } elseif (!$grabo and $accion === "grabar") { ?>
+                                                    $("#alert-ko").alert();
+                                                    $("#alert-ko").fadeTo(2000, 700).slideUp(700, function () {
+                                                        $("#alert-ko").slideUp(700);
+                                                    });
+                                                    <?php } ?>
 
-                                        <% if (grabo) {%>
-                                                $("#alert-ok").alert();
-                                                $("#alert-ok").fadeTo(2000, 700).slideUp(700, function () {
-                                                    $("#alert-ok").slideUp(700);
-                                                });
-                                        <%} else if (!grabo && accion.equals("grabar")) {%>
-                                                $("#alert-ko").alert();
-                                                $("#alert-ko").fadeTo(2000, 700).slideUp(700, function () {
-                                                    $("#alert-ko").slideUp(700);
-                                                });
-                                        <%}%>
-                                            
-                                        <% if(cargar){%>
-                                            
-                                            $.post("acciones.jsp", {cveArt: <%= p.getCveArticulo().getCveArticulo() %>,cveFrac:<%= p.getCveFraccion().getCveFraccion() %>, xAccion: "cargaComboFracciones"}, function (data) {
+                                                    <?php if ($cargar) { ?>
+                                                    $.post("acciones.php", {cveArt: <?php echo($p->getCveArticulo()->getCveArticulo()); ?>, cveFrac:<?php echo($p->getCveFraccion()->getCveFraccion()); ?>, xAccion: "cargaComboFracciones"}, function (data) {
                                                         $("#cmbFraccion").html(data);
                                                         $("#cmbFraccion").attr("disabled", false);
-
                                                     });
-                                         <%}%>   
+                                                    <?php } ?>
 
 
                                                 $("#cmbArticulo").change(
@@ -247,13 +229,11 @@
                                                         {
                                                             $("#cmbFraccion").html("<option value=\"0\">---------- SELECCIONE UNA OPCIÓN -----------</option>");
                                                             $("#cmbFraccion").attr("disabled", true);
-
                                                             $("#cmbArticulo option:selected").each(
                                                                     function ()
                                                                     {
                                                                         elegido = $(this).val();
-
-                                                                        $.post("acciones.jsp", {cveArt: elegido, xAccion: "cargaComboFracciones"}, function (data) {
+                                                                        $.post("acciones.php", {cveArt: elegido, xAccion: "cargaComboFracciones"}, function (data) {
                                                                             $("#cmbFraccion").html(data);
                                                                             if ($("#cmbFraccion option").length > 1)
                                                                             {
@@ -273,16 +253,12 @@
                                             function limpiar()
                                             {
                                                 $('#cmbArticulo').val(0);
-
                                                 $("#cmbFraccion").attr("disabled", true)
                                                 $('#cmbFraccion').val(0);
-
                                                 $("#cmbInciso").attr("disabled", true)
                                                 $('#cmbInciso').val(0);
-
                                                 $("#cmbApartado").attr("disabled", true)
                                                 $('#cmbApartado').val(0);
-
                                             }
 
                                             function grabar()
@@ -297,7 +273,6 @@
                                             {
                                                 var valido = true;
                                                 var msg = "";
-
                                                 if ($("#cmbArea").val() === "0")
                                                 {
                                                     msg += "Elija un área por favor. \n";

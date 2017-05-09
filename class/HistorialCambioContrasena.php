@@ -94,8 +94,9 @@ class HistorialCambioContrasena {
 
         if (!$this->_existe) {
             $this->cveHistorial = UtilDB::getSiguienteNumero("historial_cambio_contrasena", "cve_historial");
-            $sql = "INSERT historial_cambio_contrasena VALUES(";
+            $sql = "INSERT INTO historial_cambio_contrasena VALUES(";
             $sql .= "$this->cveHistorial,";
+            $sql .= $this->getCveUsuario()->getCveUsuario().",";
             $sql .= "'$this->contrasenaNueva',";
             $sql .= "'$this->contrasenaAnterior',";
             $sql .= "NOW()";

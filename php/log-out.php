@@ -1,28 +1,16 @@
-<%-- 
-    Document   : log-out
-    Created on : 23-mar-2017, 11:14:56
-    Author     : Roberto Eder Weiss Juárez
---%>
-<%@page import="mx.edu.uttab.transparencia.comun.Sesiones"%>
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
-<%
-    HttpSession httpSession = request.getSession(false);
+<?php
 
-    if (request.getParameter("logout") != null) {
-        response.setContentType("text/html");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setHeader("Cache-Control", "no-store");
-        response.setDateHeader("Expires", 0);
-        response.setHeader("Pragma", "no-cache");
-        httpSession.removeAttribute(Sesiones.USUARIO);
-        httpSession.removeAttribute(Sesiones.NOMBRE);
-        httpSession.removeAttribute(Sesiones.ANIO);
-        httpSession.removeAttribute(Sesiones.TRIMESTRE);
-        httpSession.removeAttribute(Sesiones.URL_PUBLICA);
-        httpSession.invalidate();
-        httpSession = null;
+session_start();
 
-        response.sendRedirect("../index.jsp");
-        return;
-    }
-%>
+if (isset($_GET['logout'])) {
+    unset($_SESSION['usr']);
+    unset($_SESSION['nombre']);
+    unset($_SESSION['area']);
+    unset($_SESSION['anio']);
+    unset($_SESSION['trimestre']);
+    unset($_SESSION['url_publica']);
+    header('Location: ../index.php');
+    die();
+    return;
+}
+?>

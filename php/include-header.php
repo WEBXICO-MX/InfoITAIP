@@ -1,9 +1,9 @@
 <?php
-require_once '../class/Area.php';
+
 $nombre_completo = "";
 $area = new Area();
 $path = "";
-
+   
 if (isset($origen) && $origen != "index") {
     $path = "../";
 }
@@ -39,7 +39,7 @@ if (isset($_SESSION['usr'])) {
     </div>
 </div>
 <?php
-if (!$origen === "index" and ! $origen === "informacion-publica") {
+if ($origen !== "index" and $origen !== "informacion-publica") {
     ?>
     <div class="row">
         <div class="col-md-12" style="background-color: #21C9AA;min-height: 10px; padding: 5px; box-sizing: border-box ">

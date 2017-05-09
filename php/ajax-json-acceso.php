@@ -19,7 +19,7 @@ if ($usr->get_existe()) {
                 $_SESSION['area'] = $usr->getCveArea()->getCveArea();
                 $_SESSION['anio'] = 0;
                 $_SESSION['trimestre'] = 0;
-                $_SESSION['url_publica'] = 0;
+                $_SESSION['url_publica'] = "http://transparencia.uttab.edu.mx/";
 
                 $json = '{"msg":"Bienvenid@ ' . $usr->getNombreCompleto() . '","c":' . $usr->getCveUsuario() . ',"valido":true}';
             } else {
