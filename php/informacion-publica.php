@@ -89,7 +89,7 @@ $origen = "informacion-publica";
                                                 $html2 .= "<div class=\"panel-body\">";
                                                 $html2 .= "<p>" . $row2["descripcion"] . "</p><br/><br/>";
 
-                                                $sql = "SELECT * FROM incisos WHERE cve_articulo = " . $row["cve_articulo"] . " AND cve_fraccion = " . $row2["cve_articulo"] . " AND activo = 1 ORDER BY cve_inciso ASC";
+                                                $sql = "SELECT * FROM incisos WHERE cve_articulo = " . $row["cve_articulo"] . " AND cve_fraccion = " . $row2["cve_fraccion"] . " AND activo = 1 ORDER BY cve_inciso ASC";
                                                 $rst3 = UtilDB::ejecutaConsulta($sql);
 
                                                 if ($rst3->rowCount() != 0) {
@@ -106,7 +106,7 @@ $origen = "informacion-publica";
                                                         $html2 .= "<div id=\"collapse-inciso-" . $row3["cve_inciso"] . "\" class=\"panel-collapse collapse \">";
                                                         $html2 .= "<div class=\"panel-body\">";
 
-                                                        $sql = "SELECT * FROM apartados WHERE cve_articulo = " . $row["cve_articulo"] . " AND cve_fraccion = " . $row2["cve_fraccion"] . " AND cve_inciso = " . $row2["cve_inciso"] . " AND activo = 1 ORDER BY cve_apartado ASC";
+                                                        $sql = "SELECT * FROM apartados WHERE cve_articulo = " . $row["cve_articulo"] . " AND cve_fraccion = " . $row2["cve_fraccion"] . " AND cve_inciso = " . $row3["cve_inciso"] . " AND activo = 1 ORDER BY cve_apartado ASC";
                                                         $rst4 = UtilDB::ejecutaConsulta($sql);
 
                                                         if ($rst4->rowCount() != 0) {
